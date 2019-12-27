@@ -1,0 +1,29 @@
+<UI version="4.0" >
+ <class>CG_Task_ZC_QTClass</class>
+ <widget class="QMainWindow" name="CG_Task_ZC_QTClass" >
+  <property name="objectName" >
+   <string notr="true">CG_Task_ZC_QTClass</string>
+  </property>
+  <property name="geometry" >
+   <rect>
+	<x>0</x>
+	<y>0</y>
+	<width>600</width>
+	<height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>CG_Task_ZC_QT</string>
+  </property>
+  <widget class="QMenuBar" name="menuBar" />
+  <widget class="QToolBar" name="mainToolBar" />
+  <widget class="QWidget" name="centralWidget" />
+  <widget class="QStatusBar" name="statusBar" />
+ </widget>
+ <layoutDefault spacing="6" margin="11" />
+ <pixmapfunction></pixmapfunction>
+ <resources>
+   <include location="CG_Task_ZC_QT.qrc"/>
+ </resources>
+ <connections/>
+</UI>

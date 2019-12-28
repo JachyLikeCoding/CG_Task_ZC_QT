@@ -8,14 +8,6 @@ class ClassifiedEdge;
 class ActiveEdge;
 class ActivePolygon;
 
-class nPolygon
-{
-public:
-	QVector<int> vertices;
-
-
-};
-
 //分类多边形表
 class ClassifiedPolygon {
 public:

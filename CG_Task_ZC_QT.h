@@ -19,11 +19,10 @@ public:
 	CG_Task_ZC_QT(QWidget *parent = Q_NULLPTR);
 
 public slots:
-		void displayModeChoose();
 		void algorithmChoose();
 		void speedUpChoose();
 		void getTime();
-		//void scanlineZbuffer();
+		void drawResult();
 		void zoomin();
 		void zoomout();
 		void keyPressEvent(QKeyEvent *e);

@@ -11,13 +11,12 @@ class myOpenGL : public QGLWidget
 public:
 	explicit myOpenGL(QWidget *parent = nullptr);
 	~myOpenGL();
-	bool mode = false;  // mode: show face or line : 0->face; 1->line
 	bool isSpeedUp = true; //true: speed up;  false: not speed up
 	bool algorithmChoose = false;	//true:scanline-z-buffer;  false:regional-scanline
 	int vcount = 0;
 	int fcount = 0;
 	double time = 0;
-	QString objName = "models/test.obj";
+	QString objName = "models/cat.obj";
 
 protected:
 	void initializeGL();
@@ -26,7 +25,8 @@ protected:
 
 private:
 	Object obj;
-	int winWidth, winHeight;
+	int winWidth = 800;
+	int winHeight = 600;
 	GLfloat Ortho = 5;
 	bool in;
 	int angleX = 0, angleY = 0;

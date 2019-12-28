@@ -1,31 +1,27 @@
 #include "ObjLoader.h"
 
-int Round(GLfloat x) {
-	if (x > 0) {
-		return (int)(x + 0.5);
-	}
-	else {
-		return (int)(x - 0.5);
-	}
-}
-
 void Object::initObject(const QString &objName, int _width, int _height, int _mode) {
 	winWidth = _width;
 	winHeight = _height;
 	mode = _mode;
 	view = *(new ivec3(0, 0, -1));
-	bool flag = loadObj(objName);
+	/*bool flag = loadObj(objName);
 	colorlist.resize(faces.size());
 	
 	if (!flag) 
 	{
 		qDebug() << "ERROR: File loaded fail. Please check your file '" << objName << " '.\n";
-	}
+	}*/
 }
 
 
 bool Object::loadObj(const QString &objName) {
-
+	minZ = INT_MAX;
+	minY = INT_MAX;
+	minX = INT_MAX;
+	maxZ = INT_MIN;
+	maxY = INT_MIN;
+	maxX = INT_MIN;
 	QFile file(objName);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "Can't open the file!" << endl;
@@ -49,12 +45,14 @@ bool Object::loadObj(const QString &objName) {
 				x = list[0].toFloat();
 				y = list[1].toFloat();
 				z = list[2].toFloat();
-				originvertices.push_back(vec3(x,y,z));
+				minX = std::min(minX, x);
+				minY = std::min(minY, y);
+				minZ = std::min(minZ, z);
+				maxX = std::max(maxX, x);
+				maxY = std::max(maxY, y);
+				maxZ = std::max(maxZ, z);
 				
-				/*minY = minY > y ? y : minY;
-				minX = minX > x ? x : minX;
-				maxY = maxY > y ? maxY : y;
-				maxX = maxX > x ? maxX : x;*/
+				originvertices.push_back(vec3(x,y,z));
 			}
 			else if (str[0] == 'f' && str[1] == ' ') {
 				str = str.trimmed();
@@ -90,27 +88,24 @@ bool Object::loadObj(const QString &objName) {
 			}
 		}
 	}
-	Ortho = abs(minX) > abs(minY) ? abs(minX) : abs(minY);
-	Ortho = Ortho > abs(maxX) ? Ortho : abs(maxX);
-	Ortho = 1.5*(Ortho > abs(maxY) ? Ortho : abs(maxY));
-	qDebug() << "Ortho:-----------------" << Ortho << endl;
-
-	//just for debug:
-	qDebug() << originvertices.size() << endl;
-	qDebug() << faces.size() << endl;
-	qDebug() << "-------------------------after change vertices:" << endl;
-	getScreenPos(originvertices, vertices);
-
 	qDebug() << "minY:-----------------" << minY << endl;
 	qDebug() << "maxY:-----------------" << maxY << endl;
 	qDebug() << "minX:-----------------" << minX << endl;
 	qDebug() << "maxX:-----------------" << maxX << endl;
 	qDebug() << "minZ:-----------------" << minZ << endl;
 	qDebug() << "maxZ:-----------------" << maxZ << endl;
+	Ortho = abs(minX) > abs(minY) ? abs(minX) : abs(minY);
+	Ortho = Ortho > abs(maxX) ? Ortho : abs(maxX);
+	Ortho = 1.5*(Ortho > abs(maxY) ? Ortho : abs(maxY));
+	qDebug() << "Ortho:-----------------" << Ortho << endl;
+	//just for debug:
+	qDebug() << originvertices.size() << endl;
+	qDebug() << faces.size() << endl;
+	colorlist.resize(faces.size());
+	//getScreenPos(originvertices, vertices);
+	modelUnitize();
 	return true;
 }
-
-
 
 ClassifiedEdge Object::CalEdge(int polygon_id, int v1_id, int v2_id, ClassifiedEdge edge) {
 	vec3 v1 = vertices[v1_id];
@@ -222,119 +217,57 @@ void Object::CalFaceEdges(int face_id) {
 		edges.push_back(CalEdge(face_id, v2, v3, edge3));
 }
 
-//just for debug
-void Object::test() {
-	//test vertices of face
-	qDebug() << "face count: " << faces.size() << endl;
-	qDebug() << "vertices count:" << originvertices.size() << endl;
-	/*for (int i = 0; i < faces.size(); i++) {
-		CalFaceEdges(i);
-		qDebug() << "[" << i << "]";
-		for (int j = 0; j < faces[i].size(); j++) {
-			qDebug() << faces[i][j] << "\t";
-		} 
-		qDebug() << endl;
-	}*/
-	//test edges of face:
-	/*qDebug() << edges.size() << endl;
-	for (int i = 0; i < edges.size(); i++) {
-		qDebug() << "edge_polygon_id: " << edges[i].edge_polygon_id;
-		qDebug() << "\tedge_dy: " << edges[i].dy << endl;
-	}*/
-}
 
-void Object::ChangeScreenSize() {
-	GLfloat dx = round(maxX) - round(minX);
-	GLfloat dy = round(maxY) - round(minY);
-	if (dx > dy) {	//winWidth不变
-		winHeight = (int)((winWidth) * dy / dx);
-	}
-	else {	//winHeight不变
-		winWidth = (int)((winHeight)* dx / dy);
-	}
-}
 
-//void Object::ChangeOriginvertices() {
-//	float xDis = maxX - minX;
-//	float yDis = maxY - minY;
-//	float xScale = (float)(xDis / winWidth);
-//	float yScale = (float)(yDis / winHeight);
-//	float Scale = xScale > yScale ? xScale : yScale;
-//	qDebug() << "scale: " << Scale << endl;
-//
-//	//移到左上角
-//	float xMovement = minX <= 0 ? 1.2 * abs(minX) : 0.1* abs(minX);
-//	float yMovement = minY <= 0 ? 1.2 * abs(minY) : 0.1 * abs(minX);
-//
-//	if (Scale <= 0.01)
-//		Scale = (int)(1 / Scale - 0.5) * 0.5;
-//	else if (Scale < 0.5)
-//		Scale = (int)(1 / Scale) * 0.6;
-//	else if (Scale > 1)
-//		Scale = 1.0f / (int)(Scale + 0.5);
-//	else
-//		Scale = 1;
-//
-//	qDebug() << "scale: " << Scale << endl;
-//	maxY = INT_MIN;
-//	minY = INT_MAX;
-//	maxX = INT_MIN;
-//	minX = INT_MAX;
-//	vertices.clear();
-//	if (Scale != 1 || xMovement != 0 || yMovement != 0) {
-//		for (auto v : originvertices) {
-//			//qDebug() << "v: " << v.x << ", " << v.y << ", " << v.z << endl;
-//			vec3 tmpv(v.x + xMovement, v.y + yMovement, v.z);//平移
-//			tmpv = tmpv * Scale;//缩放
-//			tmpv.x = round(tmpv.x);
-//			tmpv.y = round(tmpv.y);
-//			tmpv.z = round(tmpv.z);
-//
-//			maxY = maxY > tmpv.y ? maxY : tmpv.y;
-//			maxX = maxX > tmpv.x ? maxX : tmpv.x;
-//			minY = minY < tmpv.y ? minY : tmpv.y;
-//			minX = minX < tmpv.x ? minX : tmpv.x;
-//			vertices.push_back(tmpv);
-//			//qDebug() << "after v: " << tmpv.x << ", " << tmpv.y  << ", " << tmpv.z << endl;
-//		}
+//void Object::getScreenPos(QVector<vec3> &original, QVector<ivec3> &screenVertices) {
+//	screenVertices.clear();
+//	GLint viewport[4];
+//	GLdouble modelview[16];
+//	GLdouble projection[16];
+//	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+//	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+//	glGetIntegerv(GL_VIEWPORT, viewport);
+//	int length = original.size();
+//	for (int i = 0; i < length; i++) {
+//		GLdouble x, y, z;
+//		gluProject(original[i].x, original[i].y, original[i].z, modelview, projection, viewport, &x, &y, &z);
+//		ivec3 screen_pos(x, y, z);
+//		minZ = std::min(screen_pos.z, int(minZ));
+//		minY = std::min(screen_pos.y, int(minY));
+//		minX = std::min(screen_pos.x, int(minX));
+//		maxZ = std::max(screen_pos.z, int(maxZ));
+//		maxY = std::max(screen_pos.y, int(maxY));
+//		maxX = std::max(screen_pos.x, int(maxX));
+//		screenVertices.push_back(screen_pos);
 //	}
-//	qDebug() << "最值：" << maxY << ", " << maxX << ", " <<  minY << ", " << minX << endl;
-//	if (maxY > winHeight) {
-//		cerr << "Y out of range!!!!!!\n";
+//	//just for debug
+//	qDebug() << "before change:\n";
+//	for (int i = 0; i < original.size(); i++)
+//	{
+//		qDebug() << original[i].x << ", " << original[i].y << ", " << original[i].z << endl;
 //	}
-//	if (maxX > winWidth) {
-//		cerr << "x out of range!!!!!!\n";
+//	qDebug() << "after change:\n";
+//	for (int i = 0; i < screenVertices.size(); i++)
+//	{
+//		qDebug() << screenVertices[i].x << ", " << screenVertices[i].y << ", " << screenVertices[i].z << endl;
 //	}
+//	qDebug() << "minY:-----------------" << minY << endl;
+//	qDebug() << "maxY:-----------------" << maxY << endl;
+//	qDebug() << "minX:-----------------" << minX << endl;
+//	qDebug() << "maxX:-----------------" << maxX << endl;
+//	qDebug() << "minZ:-----------------" << minZ << endl;
+//	qDebug() << "maxZ:-----------------" << maxZ << endl;
 //}
-
 
 void Object::getScreenPos(QVector<vec3> &original, QVector<ivec3> &screenVertices) {
 	screenVertices.clear();
-	minZ = INT_MAX;
-	minY = INT_MAX;
-	minX = INT_MAX;
-	maxZ = INT_MIN;
-	maxY = INT_MIN;
-	maxX = INT_MIN;
-
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	for (auto v : original) {
-		GLdouble x, y, z;
-		gluProject(v.x, v.y, v.z, modelview, projection, viewport, &x, &y, &z);
-		ivec3 screen_pos(x, y, z);
-		minZ = minZ > z ? z : minZ;
-		minY = minY > y ? y : minY;
-		minX = minX > x ? x : minX;
-		maxZ = maxZ> z ? maxZ : z;
-		maxY = maxY > y ? maxY : y;
-		maxX = maxX > x ? maxX : x;
+	int length = original.size();
+	GLfloat scale = std::max(abs(maxY),abs(maxX));
+	vec3 screen_pos;
+	for (int i = 0; i < length; i++) {
+		screen_pos = original[i] /scale;
+		//screen_pos += (1, 1, 1);
+		//screen_pos *= (winWidth / 4);
 		screenVertices.push_back(screen_pos);
 	}
 	//just for debug
@@ -346,6 +279,94 @@ void Object::getScreenPos(QVector<vec3> &original, QVector<ivec3> &screenVertice
 	qDebug() << "after change:\n";
 	for (int i = 0; i < screenVertices.size(); i++)
 	{
+		minZ = std::min(screenVertices[i].z, int(minZ + 0.5));
+		minY = std::min(screenVertices[i].y, int(minY + 0.5));
+		minX = std::min(screenVertices[i].x, int(minX + 0.5));
+		maxZ = std::max(screenVertices[i].z, int(maxZ + 0.5));
+		maxY = std::max(screenVertices[i].y, int(maxY + 0.5));
+		maxX = std::max(screenVertices[i].x, int(maxX + 0.5));
 		qDebug() << screenVertices[i].x << ", " << screenVertices[i].y << ", " << screenVertices[i].z << endl;
 	}
+	qDebug() << "minY:-----------------" << minY << endl;
+	qDebug() << "maxY:-----------------" << maxY << endl;
+	qDebug() << "minX:-----------------" << minX << endl;
+	qDebug() << "maxX:-----------------" << maxX << endl;
+	qDebug() << "minZ:-----------------" << minZ << endl;
+	qDebug() << "maxZ:-----------------" << maxZ << endl;
+}
+
+void Object::modelUnitize()
+{
+	double cx, cy, cz, w, h, d;
+	double scale;
+
+	if (originvertices.size() > 0)
+	{
+		w = abs(maxX) + abs(minX);
+		h = abs(maxY) + abs(minY);
+		d = abs(maxZ) + abs(minZ);
+		//计算模型的中心
+		cx = (maxX + minX) / 2.0;
+		cy = (maxY + minY) / 2.0;
+		cz = (maxZ + minZ) / 2.0;
+
+		scale = 1.6 / std::max(w, std::max(h, d));
+		scale = scale * 400;
+
+		//将中心按照比例转换
+		for (int i = 0; i < originvertices.size(); i++)
+		{
+			originvertices[i].x -= cx;
+			originvertices[i].y -= cy;
+			originvertices[i].z -= cz;
+
+			originvertices[i].x += (w / 2);
+			originvertices[i].y += (h / 2);
+
+			originvertices[i].x *= scale;
+			originvertices[i].y *= scale;
+			originvertices[i].z *= -scale;
+			vertices.push_back(originvertices[i]);
+		}
+	}
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		minZ = std::min(vertices[i].z, int(minZ + 0.5));
+		minY = std::min(vertices[i].y, int(minY + 0.5));
+		minX = std::min(vertices[i].x, int(minX + 0.5));
+		maxZ = std::max(vertices[i].z, int(maxZ + 0.5));
+		maxY = std::max(vertices[i].y, int(maxY + 0.5));
+		maxX = std::max(vertices[i].x, int(maxX + 0.5));
+		qDebug() << vertices[i].x << ", " << vertices[i].y << ", " << vertices[i].z << endl;
+	}
+	qDebug() << "minY:-----------------" << minY << endl;
+	qDebug() << "maxY:-----------------" << maxY << endl;
+	qDebug() << "minX:-----------------" << minX << endl;
+	qDebug() << "maxX:-----------------" << maxX << endl;
+	qDebug() << "minZ:-----------------" << minZ << endl;
+	qDebug() << "maxZ:-----------------" << maxZ << endl;
+}
+
+
+
+
+//just for debug
+void Object::test() {
+	//test vertices of face
+	qDebug() << "face count: " << faces.size() << endl;
+	qDebug() << "vertices count:" << originvertices.size() << endl;
+	/*for (int i = 0; i < faces.size(); i++) {
+		CalFaceEdges(i);
+		qDebug() << "[" << i << "]";
+		for (int j = 0; j < faces[i].size(); j++) {
+			qDebug() << faces[i][j] << "\t";
+		}
+		qDebug() << endl;
+	}*/
+	//test edges of face:
+	/*qDebug() << edges.size() << endl;
+	for (int i = 0; i < edges.size(); i++) {
+		qDebug() << "edge_polygon_id: " << edges[i].edge_polygon_id;
+		qDebug() << "\tedge_dy: " << edges[i].dy << endl;
+	}*/
 }

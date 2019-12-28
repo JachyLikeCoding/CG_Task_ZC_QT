@@ -16,18 +16,12 @@ CG_Task_ZC_QT::CG_Task_ZC_QT(QWidget *parent)
 	speedUpChooseGroup->addButton(ui.noSpeedUp, 1);
 	ui.speedUp->setChecked(true);
 
-	DisplayModeChooseGroup = new QButtonGroup(this);
-	DisplayModeChooseGroup->addButton(ui.showLineFrame, 0);
-	DisplayModeChooseGroup->addButton(ui.showFace, 1);
-	ui.showFace->setChecked(true);
-
-	connect(ui.showFace, SIGNAL(clicked(bool)), this, SLOT(displayModeChoose()));
-	connect(ui.showLineFrame, SIGNAL(clicked(bool)), this, SLOT(displayModeChoose()));
 	connect(ui.speedUp, SIGNAL(clicked(bool)), this, SLOT(speedUpChoose()));
 	connect(ui.noSpeedUp, SIGNAL(clicked(bool)), this, SLOT(speedUpChoose()));
 	connect(ui.scanlineZBuffer, SIGNAL(clicked(bool)), this, SLOT(algorithmChoose()));
 	connect(ui.regionalScanline, SIGNAL(clicked(bool)), this, SLOT(algorithmChoose()));
 	connect(ui.startDraw, SIGNAL(clicked()), this, SLOT(getTime()));
+	connect(ui.startDraw, SIGNAL(clicked()), this, SLOT(drawResult()));
 	connect(ui.zoomin, SIGNAL(clicked()), this, SLOT(zoomin()));
 	connect(ui.zoomout, SIGNAL(clicked()), this, SLOT(zoomout()));
 	connect(ui.modelChoose, SIGNAL(clicked()), this, SLOT(openFile()));
@@ -42,35 +36,17 @@ CG_Task_ZC_QT::CG_Task_ZC_QT(QWidget *parent)
 		"selection-background-color: gray;");
 }
 
-void CG_Task_ZC_QT::displayModeChoose()
-{
-	switch (DisplayModeChooseGroup->checkedId())
-	{
-	case 0:
-		ui.openGLWidget->mode = 0;
-		qDebug() << "mode = 0" << endl;
-		break;
-	case 1:
-		ui.openGLWidget->mode = 1;
-		qDebug() << "mode = 1" << endl;
-		break;
-	default:
-		break;
-	}
-}
-
-
 void CG_Task_ZC_QT::algorithmChoose()
 {
 	switch (algorithmChooseGroup->checkedId())
 	{
 	case 0:
 		ui.openGLWidget->algorithmChoose = 0;
-		qDebug() << "mode = 0" << endl;
+		qDebug() << "scanline-z-buffer" << endl;
 		break;
 	case 1:
 		ui.openGLWidget->algorithmChoose = 1;
-		qDebug() << "mode = 1" << endl;
+		qDebug() << "regional-scanline" << endl;
 		break;
 	default:
 		break;
@@ -149,4 +125,8 @@ void CG_Task_ZC_QT::getTime()
 	QString vCount = QString::number(ui.openGLWidget->vcount);
 	qDebug() << "vertex Count = " << vCount << endl;
 	ui.verticesNum->setText(vCount);
+}
+
+void CG_Task_ZC_QT::drawResult() {
+	ui.openGLWidget->updateGL();
 }

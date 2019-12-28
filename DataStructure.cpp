@@ -1,32 +1,5 @@
 #include"DataStructure.h"
 
-//ActiveEdge::ActiveEdge(ClassifiedEdge &leftEdge, ClassifiedEdge &rightEdge, ClassifiedPolygon &CP) {
-//	xl = leftEdge.x;
-//	xr = rightEdge.x;
-//	//debug
-//	if (xl < 0 || xr < 0) {
-//		qDebug() << "xl < 0 || xr < 0" << endl;
-//		system("pause");
-//	}
-//	dxl = leftEdge.dx;
-//	dyl = leftEdge.dy;
-//	dxr = rightEdge.dx;
-//	dyr = rightEdge.dy;
-//	edge_polygon_id = CP.polygon_id;
-//	if (abs(CP.c) > 1e-5)//if c != 0
-//	{
-//		dzx = -CP.a / CP.c;
-//		dzy = CP.b / CP.c;
-//		zl = dzx * xl - dzy * leftEdge.maxY - CP.d / CP.c;
-//	}
-//	else {
-//		dzx = -INT_MAX;
-//		dzy = INT_MAX;
-//		zl = -INT_MAX;
-//	}
-//}
-
-
 ActiveEdge::ActiveEdge(ClassifiedEdge &leftEdge, ClassifiedEdge &rightEdge, ActivePolygon &AP) {
 	xl = leftEdge.x;
 	xr = rightEdge.x;

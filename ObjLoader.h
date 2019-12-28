@@ -13,7 +13,7 @@ public:
 	QVector<QVector<int>> faces;
 	QVector<ClassifiedEdge> edges;
 	void initObject(const QString &objName, int width, int height, int mode);
-	
+	bool loadObj(const QString &objName);
 	void CalFace(int face_id, GLfloat &a, GLfloat &b, GLfloat &c, GLfloat &d, int &maxY, GLfloat &maxZ, int &dy, vec3 &color);
 	void CalFaceEdges(int face_id);
 	GLfloat maxY, minY, maxX, minX, maxZ, minZ;
@@ -21,17 +21,15 @@ public:
 	int getWinHeight() { return winHeight; }
 	GLfloat getOrtho() { return Ortho; }
 	void test();
-
+	void modelUnitize();
 private:
 	int winWidth, winHeight;
 	int mode;
 	ivec3 view;		// default (0,0,-1)
 	GLfloat Ortho;
-	bool loadObj(const QString &objName);
 	ClassifiedEdge CalEdge(int polygon_id, int v1_id, int v2_id, ClassifiedEdge edge);
 	void getScreenPos(QVector<vec3> &originalposition, QVector<ivec3> &screenposition);
-	void ChangeOriginvertices();
-	void ChangeScreenSize();
+
 };
 
 

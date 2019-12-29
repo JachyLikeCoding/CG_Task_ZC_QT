@@ -6,36 +6,36 @@
 #include "ObjLoader.h"
 class ScanlineZBufferProcessor {
 public:
-	QVector<QVector<ClassifiedPolygon>> CPT;
-	QVector<QVector<ClassifiedEdge>> CET;
-	QVector<ActivePolygon> APT;
-	QVector<ActiveEdge> AET;
+	vector<vector<ClassifiedPolygon>> CPT;
+	vector<vector<ClassifiedEdge>> CET;
+	vector<ActivePolygon> APT;
+	vector<ActiveEdge> AET;
 	void initProcessor(Object &_obj);
 	void ScanlineZBuffer(Object &_obj);
 	void resizeWindow(int width, int height);
-	QVector<GLfloat> getframebuffer() { return framebuffer; }
-	int findNextCE(ActiveEdge &AE, GLfloat x, QVector<ClassifiedEdge> &CET_y);
+	vector<GLfloat> getframebuffer() { return framebuffer; }
+	int findNextCE(ActiveEdge &AE, GLfloat x, vector<ClassifiedEdge> &CET_y);
 
 private:
 	Object obj;
 	int winWidth, winHeight;
-	vec3 getColor(int polygon_id, QVector<ActivePolygon> &APT);
-	QVector<GLfloat> zbuffer;//z»º³åÆ÷
-	QVector<int> coloridbuffer;//Ö¡»º³åÆ÷
-	QVector<GLfloat> framebuffer;
+	vec3 getColor(int polygon_id, vector<ActivePolygon> &APT);
+	vector<GLfloat> zbuffer;//z»º³åÆ÷
+	vector<int> coloridbuffer;//Ö¡»º³åÆ÷
+	vector<GLfloat> framebuffer;
 	void buildCET();
 	void buildCPT();
-	bool addPolygonToAPT(int maxY, QVector<ActivePolygon> &APT, QVector<QVector<ClassifiedPolygon>> &CPT);
-	void addEdgeToAET(QVector<ClassifiedEdge> &CET_y, QVector<ActiveEdge> &AET, QVector<ActivePolygon> &APT);
-	bool updateBuffer(QVector<ActiveEdge> &AET, int y);
-	bool update_APTAET(QVector<ActivePolygon> &APT, QVector<ActiveEdge> &AET, QVector<ClassifiedEdge> &CET_y);
-	bool update_AET(ActiveEdge &AE, QVector<ClassifiedEdge> &CET_y);
+	bool addPolygonToAPT(int maxY, vector<ActivePolygon> &APT, vector<vector<ClassifiedPolygon>> &CPT, vector<ClassifiedEdge> &CET_y);
+	void addEdgeToAET(vector<ClassifiedEdge> &CET_y, vector<ActiveEdge> &AET, vector<ActivePolygon> &APT);
+	bool updateBuffer(vector<ActiveEdge> &AET, int y);
+	bool update_APTAET(vector<ActivePolygon> &APT, vector<ActiveEdge> &AET, vector<ClassifiedEdge> &CET_y);
+	bool update_AET(ActiveEdge &AE, vector<ClassifiedEdge> &CET_y);
 	bool update_APT(ActivePolygon &AP);
 	void clearDS();
 	//just for debug
 	void test();
-	void printAET(QVector<ActiveEdge> &AET);
-	void printAPT(QVector<ActivePolygon> &APT);
+	void printAET(vector<ActiveEdge> &AET);
+	void printAPT(vector<ActivePolygon> &APT);
 };
 
 #endif // !SCANLINE_Z_BUFFER_H

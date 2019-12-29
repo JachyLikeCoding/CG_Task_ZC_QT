@@ -7,13 +7,13 @@ CG_Task_ZC_QT::CG_Task_ZC_QT(QWidget *parent)
 	rTri = 0.0;
 	fullscreen = false;
 	algorithmChooseGroup = new QButtonGroup(this);
-	algorithmChooseGroup->addButton(ui.regionalScanline, 0);
-	algorithmChooseGroup->addButton(ui.scanlineZBuffer, 1);
-	ui.scanlineZBuffer->setChecked(true);
+	algorithmChooseGroup->addButton(ui.scanlineZBuffer, 0);
+	algorithmChooseGroup->addButton(ui.regionalScanline, 1);
+	//ui.scanlineZBuffer->setChecked(true);
 
 	speedUpChooseGroup = new QButtonGroup(this);
-	speedUpChooseGroup->addButton(ui.speedUp, 0);
-	speedUpChooseGroup->addButton(ui.noSpeedUp, 1);
+	speedUpChooseGroup->addButton(ui.noSpeedUp, 0);
+	speedUpChooseGroup->addButton(ui.speedUp, 1);
 	ui.speedUp->setChecked(true);
 
 	connect(ui.speedUp, SIGNAL(clicked(bool)), this, SLOT(speedUpChoose()));
@@ -41,11 +41,11 @@ void CG_Task_ZC_QT::algorithmChoose()
 	switch (algorithmChooseGroup->checkedId())
 	{
 	case 0:
-		ui.openGLWidget->algorithmChoose = 0;
+		ui.openGLWidget->algorithmChoose = 1;
 		qDebug() << "scanline-z-buffer" << endl;
 		break;
 	case 1:
-		ui.openGLWidget->algorithmChoose = 1;
+		ui.openGLWidget->algorithmChoose = 2;
 		qDebug() << "regional-scanline" << endl;
 		break;
 	default:
@@ -61,11 +61,11 @@ void CG_Task_ZC_QT::speedUpChoose()
 	{
 	case 0:
 		ui.openGLWidget->isSpeedUp = 0;
-		qDebug() << "scanline-z-buffer" << endl;
+		qDebug() << "no speed up" << endl;
 		break;
 	case 1:
 		ui.openGLWidget->isSpeedUp = 1;
-		qDebug() << "regional-scanline" << endl;
+		qDebug() << "speed up! hurry up!" << endl;
 		break;
 	default:
 		break;
@@ -129,4 +129,5 @@ void CG_Task_ZC_QT::getTime()
 
 void CG_Task_ZC_QT::drawResult() {
 	ui.openGLWidget->updateGL();
+	qDebug() << "drawResult! " << endl;
 }

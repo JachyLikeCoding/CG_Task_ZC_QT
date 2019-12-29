@@ -9,28 +9,35 @@ myOpenGL::~myOpenGL() {}
 void myOpenGL::initializeGL() {}
 
 void myOpenGL::paintGL() {
+	qDebug() << "paintGL......" << endl;
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	scanlineProcessor.CPT.clear();
 	scanlineProcessor.CET.clear();
 	obj.initObject(objName, winWidth, winHeight, algorithmChoose);
-	if (obj.loadObj(objName)) {
+	qDebug() << "obj has been loaded......" << endl;
+	bool loadObj = obj.loadObj(objName);
+	if (loadObj) {
 		//开始计时
 		clock_t startTime, endTime;
 		startTime = clock();
-		if (!algorithmChoose) {
+		if (algorithmChoose == 1) {
 			scanlineProcessor.ScanlineZBuffer(obj);
 			qDebug() << "scanline z buffer mode......" << endl;
+			displayModel();
 		}
-		else {
+		else if (algorithmChoose == 2) {
 			//TODO:区间扫描线
 			qDebug() << "regional scanline mode......" << endl;
+		}
+		else {
+			//没做选择，不需要进行操作
 		}
 		//结束计时
 		endTime = clock();
 		time = (endTime - startTime) * 1000.0 / CLOCKS_PER_SEC;
 	}
+
 }
 
 void myOpenGL::resizeGL(int width, int height){
@@ -44,4 +51,17 @@ void myOpenGL::resizeGL(int width, int height){
 	gluOrtho2D(-Ortho * scale, Ortho*scale, -Ortho, Ortho);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+}
+
+
+void myOpenGL::displayModel() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //清除颜色缓冲以及深度缓冲
+	//绘制图像
+	vector<GLfloat> framebuffer = scanlineProcessor.getframebuffer();
+	glDrawPixels(obj.getWinWidth(), obj.getWinHeight(), GL_RGB, GL_FLOAT, &framebuffer[0]);
+	//glutSwapBuffers();
+}
+
+void myOpenGL::displayModel2() {
+
 }

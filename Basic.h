@@ -5,14 +5,14 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
-#include<QVector>
+#include<vector>
 #include<cmath>
 #include<QString>
 #include<ctime>
 #include<QFile>
 #include<QString>
 #include<QDebug>
-#include<QVector>
+#include<vector>
 #include <GL\freeglut.h>
 #include "glm/glm.hpp"
 

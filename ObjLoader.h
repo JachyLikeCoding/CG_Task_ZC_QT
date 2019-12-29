@@ -7,11 +7,11 @@
 class Object {
 public:
 	Object(){}
-	QVector<ivec3> vertices;
-	QVector<vec3> originvertices;
-	QVector<vec3> colorlist;
-	QVector<QVector<int>> faces;
-	QVector<ClassifiedEdge> edges;
+	vector<ivec3> vertices;
+	vector<vec3> originvertices;
+	vector<vec3> colorlist;
+	vector<vector<int>> faces;
+	vector<ClassifiedEdge> edges;
 	void initObject(const QString &objName, int width, int height, int mode);
 	bool loadObj(const QString &objName);
 	void CalFace(int face_id, GLfloat &a, GLfloat &b, GLfloat &c, GLfloat &d, int &maxY, GLfloat &maxZ, int &dy, vec3 &color);
@@ -28,7 +28,7 @@ private:
 	ivec3 view;		// default (0,0,-1)
 	GLfloat Ortho;
 	ClassifiedEdge CalEdge(int polygon_id, int v1_id, int v2_id, ClassifiedEdge edge);
-	void getScreenPos(QVector<vec3> &originalposition, QVector<ivec3> &screenposition);
+	void getScreenPos(vector<vec3> &originalposition, vector<ivec3> &screenposition);
 
 };
 

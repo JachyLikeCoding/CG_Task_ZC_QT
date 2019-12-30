@@ -94,6 +94,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="myOpenGL.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
+    <ClCompile Include="RegionalScanline.cpp" />
     <ClCompile Include="ScanlineZBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +110,7 @@
     <ClInclude Include="Basic.h" />
     <ClInclude Include="DataStructure.h" />
     <ClInclude Include="ObjLoader.h" />
+    <ClInclude Include="RegionalScanline.h" />
     <ClInclude Include="ScanlineZBuffer.h" />
     <QtMoc Include="myOpenGL.h" />
     <ClInclude Include="x64\Debug\uic\ui_CG_Task_ZC_QT.h" />

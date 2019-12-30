@@ -9,7 +9,6 @@ CG_Task_ZC_QT::CG_Task_ZC_QT(QWidget *parent)
 	algorithmChooseGroup = new QButtonGroup(this);
 	algorithmChooseGroup->addButton(ui.scanlineZBuffer, 0);
 	algorithmChooseGroup->addButton(ui.regionalScanline, 1);
-	//ui.scanlineZBuffer->setChecked(true);
 
 	speedUpChooseGroup = new QButtonGroup(this);
 	speedUpChooseGroup->addButton(ui.noSpeedUp, 0);
@@ -105,7 +104,6 @@ void CG_Task_ZC_QT::openFile()
 
 void CG_Task_ZC_QT::zoomout() {
 	qDebug() << "zoomout" << endl;
-	glScalef(0.5, 0.5, 0.5);
 	ui.openGLWidget->updateGL();
 }
 

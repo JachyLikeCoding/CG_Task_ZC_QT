@@ -14,7 +14,6 @@ void ScanlineZBufferProcessor::initProcessor(Object& _obj) {
 }
 // build classified polygon table
 void ScanlineZBufferProcessor::buildCPT() {
-    // qDebug() << "obj.faces.size()：" << obj.faces.size() << endl;
     qDebug() << "buildCPT: " << obj.faces.size() << "faces" << endl;
     for (int i = 0; i < obj.faces.size(); i++) {
         int maxY;
@@ -24,6 +23,10 @@ void ScanlineZBufferProcessor::buildCPT() {
         vec3 color;
         obj.CalFace(i, a, b, c, d, maxY, maxZ, dy, color);
         obj.CalFaceEdges(i);
+		//speed up here
+		if (!obj.isBackFace.empty() && c < 0) {
+			continue;
+		}
         ClassifiedPolygon newCP(i, a, b, c, d, dy, color);
         qDebug() << "maxY:" << maxY << endl;
         std::cout << "i=" << i << endl;
@@ -60,22 +63,20 @@ bool ScanlineZBufferProcessor::addPolygonToAPT(int y, vector<ActivePolygon>& APT
                 continue;
             }
         }
-        ActivePolygon ap(cp.polygon_id, cp.a, cp.b, cp.c, cp.d, y, cp.color);
+		ActivePolygon ap(cp.polygon_id, cp.a, cp.b, cp.c, cp.d, cp.dy, cp.color);
         APT.push_back(ap);
     }
     return true;
 }
-void ScanlineZBufferProcessor::addEdgeToAET(vector<ClassifiedEdge>& CET_y, vector<ActiveEdge>& AET,
+bool ScanlineZBufferProcessor::addEdgeToAET(vector<ClassifiedEdge>& CET_y, vector<ActiveEdge>& AET,
                                             vector<ActivePolygon>& APT) {
     qDebug() << "APT.size(): " << APT.size() << endl;
     qDebug() << "CET_y.size(): " << CET_y.size() << endl;
-    for (int p = 0; p < APT.size(); p++) {
+    for (int p = AET.size(); p < APT.size(); p++) {
         int leftflag(-1), rightflag(-1);
         for (int i = 0; i < CET_y.size(); i++) {
             if (CET_y[i].edge_polygon_id == APT[p].polygon_id) {  //找到属于该多边形的边
                 //找到左边和右边组成边对
-                // qDebug() << "CET_y[" << i << "].edge_polygon_id == CPT_y[" << p << "].polygon_id = " <<
-                // CET_y[i].edge_polygon_id << endl;
                 if ((leftflag == -1) || (rightflag == -1)) {
                     leftflag = rightflag = i;
                 } else {
@@ -97,9 +98,10 @@ void ScanlineZBufferProcessor::addEdgeToAET(vector<ClassifiedEdge>& CET_y, vecto
                 qDebug() << endl;
             }
         } else {
-            // qDebug() << "没有加边对!" << endl;
+             qDebug() << "没有加边对!" << endl;
         }
     }
+    return true;
 }
 void ScanlineZBufferProcessor::ScanlineZBuffer(Object& _obj) {
     initProcessor(_obj);
@@ -109,20 +111,18 @@ void ScanlineZBufferProcessor::ScanlineZBuffer(Object& _obj) {
     qDebug() << "maxY: " << obj.maxY << endl;
     for (int y = obj.maxY; y >= obj.minY; y--) {  //每一行扫描线
         qDebug() << "----------------scanline y = " << y << "---------------------------" << endl;
-        if (y == 257) {
-            qDebug() << "hello fuck bug" << endl;
-        }
         zbuffer.clear();
         coloridbuffer.clear();
         zbuffer.resize(winWidth, -INT_MAX);  //离视点最远
         coloridbuffer.resize(winWidth, -1);  //背景颜色（索引设为-1）
         //检查分类多边形表，如果有新的多边形涉及该扫描线，把它放入活化多边形表中,再把它的边放入活化边表中
         if (addPolygonToAPT(y, APT, CPT, CET[y])) {
-            // addEdgeToAET(CET[y], AET, CPT[y]);
             addEdgeToAET(CET[y], AET, APT);
+            if (AET.size() != APT.size()) {
+                APT.erase(APT.begin() + AET.size(), APT.end());
+                qDebug() << "AET size != APT size, so erase APT!!!" << endl;
+            }
         }
-        
-		
 
 		if (AET.size() != APT.size()) {
 			qDebug() << "APT size: " << APT.size() << endl;
@@ -142,10 +142,10 @@ void ScanlineZBufferProcessor::ScanlineZBuffer(Object& _obj) {
 }
 bool ScanlineZBufferProcessor::update_APT(ActivePolygon& AP) {
     AP.remain_dy -= 1;
-    // TODO:AP.remain_dy < 0?
-    if (AP.remain_dy <= 0) {
+    if (AP.remain_dy < 0) {
         return false;
     } else {
+		//qDebug() << "remain dy: " << AP.remain_dy << endl;
         return true;
     }
 }
@@ -153,10 +153,19 @@ bool ScanlineZBufferProcessor::update_AET(ActiveEdge& AE, vector<ClassifiedEdge>
     AE.dyl -= 1;
     AE.dyr -= 1;
     bool hasChange = false;
+	if (AE.dyl < 0 && AE.dyr < 0) {
+		qDebug() << "AE.dyl < 0 && AE.dyr < 0" << endl;
+	}
     if (AE.dyl < 0) {
         int id = findNextCE(AE, AE.xl, CET_y);
         if (id != -1) {
+            qDebug() << "id: " << id << endl;
             AE.changeLeftEdge(CET_y[id]);
+        } 
+		else
+		{
+            qDebug() << "id: " << id << endl;
+            //return false;
         }
         hasChange = true;
     }
@@ -164,6 +173,10 @@ bool ScanlineZBufferProcessor::update_AET(ActiveEdge& AE, vector<ClassifiedEdge>
         int id = findNextCE(AE, AE.xr, CET_y);
         if (id != -1) {
             AE.changeRightEdge(CET_y[id]);
+        } 
+		else {
+            qDebug() << "id: " << id << endl;
+            //return false;
         }
         hasChange = true;
     }
@@ -187,8 +200,9 @@ int ScanlineZBufferProcessor::findNextCE(ActiveEdge& AE, GLfloat x, vector<Class
 bool ScanlineZBufferProcessor::update_APTAET(vector<ActivePolygon>& APT, vector<ActiveEdge>& AET,
                                              vector<ClassifiedEdge>& CET_y) {
     for (int i = 0; i < APT.size(); ++i) {
+		bool isAETChanged = false;
         if (update_APT(APT[i])) {  //需要更新APT[i]
-            update_AET(AET[i], CET_y);
+            isAETChanged = update_AET(AET[i], CET_y);
         } else {  // APT[i]要删除
             APT.erase(APT.begin() + i);
             AET.erase(AET.begin() + i);
@@ -212,10 +226,6 @@ bool ScanlineZBufferProcessor::updateBuffer(vector<ActiveEdge>& AET, int y) {
     zbuffer.resize(winWidth, -INT_MAX);
     coloridbuffer.resize(winWidth, -1);
     for (auto iter = AET.begin(); iter != AET.end(); ++iter) {
-        // if (iter->xl < 0 || iter->xr > 800) {
-        // qDebug() << iter - AET.begin() << endl;
-        //}
-        // for (int i = 0; i < AET.size(); i++) {
         GLfloat zx = -INT_MAX;
         for (int x = int(iter->xl); x < std::min(int(iter->xr), 800); x++) {
             if (x < 0) {
@@ -228,7 +238,6 @@ bool ScanlineZBufferProcessor::updateBuffer(vector<ActiveEdge>& AET, int y) {
                 zx += iter->dzx;
             }
             if (zx > zbuffer[x]) {
-                /*qDebug() << "zx > zbuffer" << endl;*/
                 //更新深度缓存
                 zbuffer[x] = zx;
                 //找到相应多边形的颜色
@@ -258,6 +267,7 @@ void ScanlineZBufferProcessor::clearDS() {
     CET.clear();
     CPT.clear();
 }
+
 // just for debug:
 void ScanlineZBufferProcessor::test() {
     qDebug() << "CET size:" << CET.size() << endl;

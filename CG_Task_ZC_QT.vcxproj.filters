@@ -43,6 +43,9 @@
     <ClCompile Include="myOpenGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RegionalScanline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="CG_Task_ZC_QT.h">
@@ -76,6 +79,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScanlineZBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RegionalScanline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

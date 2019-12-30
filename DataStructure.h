@@ -15,9 +15,11 @@ public:
 	GLfloat a, b, c, d;			//多边形所在平面的方程系数
 	int dy;						//跨越的扫描线数
 	vec3 color;			//多边形颜色
+	GLfloat maxZ;
 	ClassifiedPolygon(int _polygon_id, GLfloat _a, GLfloat _b, GLfloat _c, GLfloat _d, int _dy, vec3 _color) :
 		polygon_id(_polygon_id), a(_a), b(_b), c(_c), d(_d), dy(_dy), color(_color){}
-	
+	ClassifiedPolygon(GLfloat _maxZ, int _polygon_id, GLfloat _a, GLfloat _b, GLfloat _c, GLfloat _d, int _dy, vec3 _color) :
+		maxZ(_maxZ), polygon_id(_polygon_id), a(_a), b(_b), c(_c), d(_d), dy(_dy), color(_color) {}
 };
 
 //分类边表
@@ -43,10 +45,14 @@ public:
 	int polygon_id;		//多边形编号
 	GLfloat a, b, c, d;			//多边形所在平面的方程系数
 	int remain_dy;		//跨越的"剩余"扫描线数
+	bool flag = false;
 	//GLfloat color[3];	//多边形颜色
 	vec3 color;
+	GLfloat maxZ;
 	ActivePolygon(int _polygon_id, GLfloat _a, GLfloat _b, GLfloat _c, GLfloat _d, int _dy, vec3 _color) :
 		polygon_id(_polygon_id), a(_a), b(_b), c(_c), d(_d), remain_dy(_dy), color(_color){}
+	ActivePolygon( GLfloat _maxZ, int _polygon_id, GLfloat _a, GLfloat _b, GLfloat _c, GLfloat _d, int _dy, vec3 _color, bool _flag = false) :
+		flag(_flag), maxZ(_maxZ), polygon_id(_polygon_id), a(_a), b(_b), c(_c), d(_d), remain_dy(_dy), color(_color) {}
 };
 
 

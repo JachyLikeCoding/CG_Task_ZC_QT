@@ -4,6 +4,7 @@
 #include "DataStructure.h"
 #include "ObjLoader.h"
 #include"ScanlineZBuffer.h"
+#include"RegionalScanline.h"
 
 class myOpenGL : public QGLWidget
 {
@@ -17,7 +18,7 @@ public:
 	int vcount = 0;
 	int fcount = 0;
 	double time = 0;
-	QString objName = "models/cat.obj";
+	QString objName = "models/deer.obj";
 
 protected:
 	void initializeGL();
@@ -27,10 +28,10 @@ protected:
 private:
 	int winWidth = 800;
 	int winHeight = 600;
-	GLfloat Ortho = 5;
 	bool in;
 	int angleX = 0, angleY = 0;
 	void displayModel();
 	void displayModel2();
 	ScanlineZBufferProcessor scanlineProcessor;
+	RegionalScanlineProcessor regionalScanlineProcessor;
 };

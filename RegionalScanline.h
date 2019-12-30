@@ -1,17 +1,18 @@
 #pragma once
-#ifndef SCANLINE_Z_BUFFER_H
-#define SCANLINE_Z_BUFFER
+#ifndef REGIONAL_SCANLINE_Z_BUFFER
+#define REGIONAL_SCANLINE_Z_BUFFER
 #include "Basic.h"
 #include "DataStructure.h"
 #include "ObjLoader.h"
-class ScanlineZBufferProcessor {
+
+class RegionalScanlineProcessor {
 public:
 	vector<vector<ClassifiedPolygon>> CPT;
 	vector<vector<ClassifiedEdge>> CET;
 	vector<ActivePolygon> APT;
 	vector<ActiveEdge> AET;
 	void initProcessor(Object &_obj);
-	void ScanlineZBuffer(Object &_obj);
+	void RegionalScanline(Object &_obj);
 	void resizeWindow(int width, int height);
 	vector<GLfloat> getframebuffer() { return framebuffer; }
 	int findNextCE(ActiveEdge &AE, GLfloat x, vector<ClassifiedEdge> &CET_y);
@@ -20,7 +21,7 @@ private:
 	Object obj;
 	int winWidth, winHeight;
 	vec3 getColor(int polygon_id, vector<ActivePolygon> &APT);
-	vector<GLfloat> zbuffer;//z»º³åÆ÷
+	bool cmp(const ActivePolygon &a, const ActivePolygon &b);
 	vector<int> coloridbuffer;//Ö¡»º³åÆ÷
 	vector<GLfloat> framebuffer;
 	void buildCET();
@@ -38,4 +39,5 @@ private:
 	void printAPT(vector<ActivePolygon> &APT);
 };
 
-#endif // !SCANLINE_Z_BUFFER_H
+
+#endif // !REGIONAL_SCANLINE_Z_BUFFER
